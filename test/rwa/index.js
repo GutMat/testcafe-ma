@@ -1,4 +1,4 @@
-import { Selector } from "testcafe";
+import { Selector, ClientFunction } from "testcafe";
 
 fixture`RWA`.page`http://localhost:3000/`;
 
@@ -52,8 +52,87 @@ test("Wykonanie transakcji na nowym koncie użytkownika", async (t) => {
     // Kiedy Zaloguje się do aplikacji
     .click(Selector("button"));
 
-  //   cy.intercept("GET", "/transactions/public").as("transaction");
-  //   cy.get("@signinButton").click();
-  //   // Wtedy Powinienem zobaczyć ekran powitalny
-  //   cy.wait("@transaction");
+  // Wtedy Powinienem zobaczyć formularz startowy
+  await t
+    .expect(
+      Selector("div").withAttribute("data-test", "user-onboarding-dialog")
+        .visible
+    )
+    .ok();
+  await t
+    .expect(
+      Selector("div").withAttribute("data-test", "user-onboarding-dialog-title")
+        .innerText
+    )
+    .eql("Get Started with Real World App");
+
+  // Kiedy Rozpocznę wypełnianie formularza
+  await t.click(
+    Selector("button").withAttribute("data-test", "user-onboarding-next")
+  );
+  await t.expect(Selector("h2").innerText).eql("Create Bank Account");
+
+  await t
+    // Oraz Wprowadze nazwę mojego banku
+    .typeText("#bankaccount-bankName-input", "Narodowy Bank Polski")
+    // Oraz Wprowadze numer identyfikacyjny banku
+    .typeText("#bankaccount-routingNumber-input", "123456789")
+    // Oraz Wprowadze numer konta bankowego
+    .typeText("#bankaccount-accountNumber-input", "987654321");
+  // Oraz Potwierdzę wprowadzone dane
+  await t.click(
+    Selector("button").withAttribute("data-test", "bankaccount-submit")
+  );
+  // Wtedy Powinienem móc zakończyć wypełnianie formularza
+  await t
+    .expect(
+      Selector("div").withAttribute("data-test", "user-onboarding-dialog-title")
+        .innerText
+    )
+    .eql("Finished");
+  await t.click(
+    Selector("button").withAttribute("data-test", "user-onboarding-next")
+  );
+  await t
+    .expect(
+      Selector("div").withAttribute("data-test", "user-onboarding-dialog").exist
+    )
+    .notOk();
+
+  // Gdy Jestem zalogowany i wypełniłem formularz startowy
+  await t
+    .expect(
+      Selector("h6").withAttribute("data-test", "sidenav-username").innerText
+    )
+    .contains("GutMat");
+  await t.expect(Selector('div[data-test="transaction-list"] li').count).gte(1);
+
+  // Wtedy Powinienem móc dodać nową transakcję
+  await t.click(
+    Selector("a").withAttribute("data-test", "nav-top-new-transaction")
+  );
+  const getLocation = ClientFunction(() => document.location.href);
+  await t.expect(getLocation()).contains("/transaction/new");
+  // Kiedy Wybiorę drugą osobę do wykonania transakcji
+  await t.click(
+    Selector("ul").withAttribute("data-test", "users-list").child(0)
+  );
+  await t
+    .typeText("input#amount", "100")
+    .typeText("input#transaction-create-description-input", "Pożyczka");
+  await t.click(
+    Selector("button").withAttribute(
+      "data-test",
+      "transaction-create-submit-request"
+    )
+  );
+  await t
+    .expect(
+      Selector("div").withAttribute("data-test", "alert-bar-success").visible
+    )
+    .ok()
+    .expect(
+      Selector("div").withAttribute("data-test", "alert-bar-success").innerText
+    )
+    .contains("Transaction Submitted!");
 });
