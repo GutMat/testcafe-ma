@@ -1,0 +1,24 @@
+{
+  "name": "testcafe",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "test": "testcafe chrome:headless test/rwa"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GutMat/testcafe-ma.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/GutMat/testcafe-ma/issues"
+  },
+  "homepage": "https://github.com/GutMat/testcafe-ma#readme"
+}
